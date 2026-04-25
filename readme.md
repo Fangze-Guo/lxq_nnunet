@@ -7,8 +7,7 @@ This repository releases the automatic segmentation pipeline based on nnU-Net V2
 ---
 
 ## Highlights
-
-This project leverages the nnU-Net deep learning framework to achieve precise segmentation of five target structures on contrast-enhanced abdominal MRI:
+Based on the nnU-Net framework, we developed five distinct segmentation models—specifically designed for segmenting the liver, Couinaud liver segments, liver tumors, spleen, and psoas major muscle.
 
 1. Whole liver - Accurate liver parenchyma segmentation for volumetry
 2. Liver Tumor - Automatic detection and segmentation of hepatic mass
