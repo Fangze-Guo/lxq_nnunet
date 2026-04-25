@@ -1,30 +1,36 @@
-# lxq_nnunet
+# Enabling AI-driven Prediction of Post-hepatectomy Liver Failure: A Multi-center Gd-EOB- DTPA MRI Dataset with Expert Annotations and clinicopathological data
 
 Pretrained segmentation models and inference code for prediction of post-hepatectomy liver failure (PHLF).
 
 This repository releases the automatic segmentation pipeline based on nnU-Net V2, providing precise voxel-wise segmentation of multiple organs.
 
-------
+---
 
 ## Highlights
 
-This project leverages the nnU-Net deep learning framework to achieve precise segmentation of five target structures on contrast-enhanced abdominal MRI / CT:
+This project leverages the nnU-Net deep learning framework to achieve precise segmentation of five target structures on contrast-enhanced abdominal MRI:
 
 1. Whole liver - Accurate liver parenchyma segmentation for volumetry
 2. Liver Tumor - Automatic detection and segmentation of hepatic mass
-3. Couinaud Liver Segments - Automatic segmentation of eight Couinaud liver segments classification
+3. Couinaud Liver Segments - Automatic segmentation of eight Couinaud liver segments 
 4. Spleen - Automatic segmentation of spleen
 5. Skeletal Muscle - Precise psoas major muscle segmentation
 
 The five segmentation outputs feed downstream FLR volumetry and function quantification, which in turn feed the PHLF prediction model. These models are trained and validated on the PHLF Database, a comprehensive clinical dataset designed for liver surgery planning and outcome prediction.
 
-------
+---
+
+---
+## Model Architecture Diagram
+![Model Architecture](./Model%20Architecture.png)
+
+---
 
 ## Background
 
 Predicting PHLF requires accurate, voxel-wise quantification of the future liver remnant (FLR) — its volume and (indirectly) its function. This in turn depends on reliable automatic segmentation of multiple abdominal organs.
 
-------
+---
 
 ## Pre-trained Models
 
@@ -32,24 +38,23 @@ All five trained models are released on Hugging Face:
 
 🔗 https://huggingface.co/Xunqi/nnunet_segment_model/tree/main
 
-| Task               | Configuration | Modality |
-| ------------------ | ------------- | -------- |
-| couinaud_segment   | `3d_fullres`  | MRI      |
-| liver_segment      | `3d_fullres`  | MRI      |
-| livertumor_segment | `3d_fullres`  | MRI      |
-| Spleen_segment     | `3d_fullres`  | MRI      |
-| muscle_segment     | `3d_fullres`  | MRI      |
+| Task | Configuration | Modality |
+|------|---------------|----------|
+| Couinaud_segment | `3d_fullres` | MRI |
+| Liver_segment| `3d_fullres` |  MRI |
+| Livertumor_segment | `3d_fullres` | MRI |
+| Spleen_segment | `3d_fullres` | MRI |
+| Muscle_segment| `3d_fullres` | MRI |
 
 To use a pre-trained model:
 
 1. Download the model from the link above
 2. Install it using:
-
 ```bash
 nnUNetv2_install_pretrained_model_from_zip path/to/downloaded_model.zip
 ```
 
-------
+---
 
 ## Installation
 
@@ -68,7 +73,7 @@ export nnUNet_preprocessed=/path/to/nnUNet_preprocessed
 export nnUNet_results=/path/to/nnUNet_results
 ```
 
-------
+---
 
 ## Inference with Pretrained Models
 
@@ -83,7 +88,7 @@ nnUNetv2_predict \
     -f  all
 ```
 
-------
+---
 
 ## Reproducing Training from Scratch
 
@@ -94,19 +99,19 @@ nnUNetv2_plan_and_preprocess -d <DatasetID> --verify_dataset_integrity
 nnUNetv2_train <DatasetID> 3d_fullres <fold>
 ```
 
-------
+---
 
 ## PHLF Database (Companion Dataset)
 
 The annotated dataset used to train these models — and used for PHLF prediction in our study — includes:
 
-| Item                 | Description                                                  |
-| -------------------- | ------------------------------------------------------------ |
-| Imaging modality     | hepatobiliary phase (HBP)                                    |
+| Item | Description |
+|------|-------------|
+| Imaging modality | hepatobiliary phase (HBP) |
 | Annotated structures | liver, liver tumor, 8 Couinaud segments, spleen, skeletal muscle |
-| Annotation protocol  | nnU-Net pre-segmentation → manual correction by two radiologists |
+| Annotation protocol | nnU-Net pre-segmentation → manual correction by two radiologists |
 
-------
+---
 
 ## Ground-Truth Annotation Protocol
 
@@ -118,7 +123,7 @@ Ground-truth labels in our dataset were produced through a rigorous semi-automat
 
 This semi-automatic pipeline enabled efficient annotation across all five structures. The released models in this repository are trained on the final, radiologist-corrected labels, ensuring high-quality ground truth for accurate segmentation.
 
-------
+---
 
 ## Project Structure
 
@@ -143,25 +148,26 @@ lxq_nnunet/
 └── setup.py                    # Setup script
 ```
 
-------
+---
 
 ## License
 
 - The nnU-Net framework code retains its original Apache-2.0 license.
 - Our released model weights and dataset are distributed under Apache-2.0.
 
-------
+---
 
 ## Citation
 
 
 
-------
+
+---
 
 ## Acknowledgments
 
 This project is based on the nnU-Net framework developed by the Division of Medical Image Computing at the German Cancer Research Center (DKFZ), Heidelberg, Germany. We thank Fabian Isensee and the DKFZ team for releasing nnU-Net.
 
-We extend our sincere gratitude to Dr. X.Z. and Dr D.K. who provided high-quality ground truth annotations for all five segmentation targets. Their expertise and meticulous manual delineations — through nnU-Net pre-segmentation followed by careful manual correction — form the foundation of the accurate segmentation models in this project.
+We extend our sincere gratitude to Dr. D.K and Dr. Z.L who provided high-quality ground truth annotations for all five segmentation targets. Their expertise and meticulous manual delineations — through nnU-Net pre-segmentation followed by careful manual correction — form the foundation of the accurate segmentation models in this project.
 
 We also acknowledge the PHLF Database, a dedicated clinical dataset that supports the development and validation of liver-related segmentation algorithms, enabling advances in preoperative planning and postoperative outcome prediction for hepatic surgery.
