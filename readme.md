@@ -1,49 +1,46 @@
-# Enabling AI-driven Prediction of Post-hepatectomy Liver Failure: A Multi-center Gd-EOB- DTPA MRI Dataset with Expert Annotations and clinicopathological data
+# Hepatic Vessel Map (HVM): CT Dataset for Liver Vascular and Tumor Segmentation
 
-Pretrained segmentation models and inference code for prediction of post-hepatectomy liver failure (PHLF).
+Pretrained segmentation models and inference code for hepatic portal vein, hepatic vein, and liver tumor segmentation.
 
-This repository releases the automatic segmentation pipeline based on nnU-Net V2, providing precise voxel-wise segmentation of multiple organs.
+This repository releases the automatic segmentation pipeline based on nnU-Net V2, providing precise voxel-wise segmentation of hepatic vascular structures and liver tumors.
 
 ---
 
 ## Highlights
-Based on the nnU-Net framework, we developed five distinct segmentation models—specifically designed for segmenting the liver, Couinaud liver segments, liver tumors, spleen, and psoas major muscle.
 
-1. Whole liver - Accurate liver parenchyma segmentation for volumetry
-2. Liver Tumor - Automatic detection and segmentation of hepatic mass
-3. Couinaud Liver Segments - Automatic segmentation of eight Couinaud liver segments 
-4. Spleen - Automatic segmentation of spleen
-5. Skeletal Muscle - Precise psoas major muscle segmentation
+Based on the nnU-Net framework, we developed three distinct segmentation models—specifically designed for segmenting the hepatic veins, portal veins, and liver tumor segmentation on the portal venous phase of contrast-enhanced CT images.
 
-The five segmentation outputs feed downstream FLR volumetry and function quantification, which in turn feed the PHLF prediction model. These models are trained and validated on the PHLF Database, a comprehensive clinical dataset designed for liver surgery planning and outcome prediction.
+1. Hepatic Veins - Accurate segmentation of right, middle, and left hepatic veins up to third-order branches
+2. Portal Veins - Automatic segmentation of main portal vein and left/right branches up to third-order ramifications
+3. Liver Tumor - Automatic detection and segmentation of hepatic masses
 
----
+These models are trained and validated on the HVM (Hepatic Vessel Map) Dataset, a comprehensive clinical dataset designed for liver vascular segmentation and surgical planning.
 
 ---
+
 ## Model Architecture Diagram
-![Model Architecture](./Model%20Architecture.png)
+
+![Model Architecture](./Model_artichtecture.png)
 
 ---
 
 ## Background
 
-Predicting PHLF requires accurate, voxel-wise quantification of the future liver remnant (FLR) — its volume and (indirectly) its function. This in turn depends on reliable automatic segmentation of multiple abdominal organs.
+Precise delineation of hepatic and portal venous anatomy is crucial for the diagnosis of liver disease, surgical planning, and prognosis prediction. Current three-dimensional visualization of these complex vascular structures relies on manual or semi-automated CT segmentation, which is time-consuming and operator-dependent. Although several AI-based segmentation models have been developed for automatic delineation of hepatic veins and portal veins, significant limitations remain. First, existing AI models typically focus only on the main trunks and first-order branch ramifications, often failing to capture fine structural details of minor branches or to accurately differentiate between hepatic veins and portal veins—a shortcoming that may lead to incorrect identification of the resection planes in liver surgery. Second, there is a notable lack of validation data derived from diseased livers in real-world preoperative settings, raising concerns regarding model generalizability. Since most patients undergoing liver surgery present with underlying hepatic pathology, such pathological alterations— including reduced of hepatic vascular volume, increased venous tortuosity, portal vein embolism, and alterations in venous morphology and topology caused by tumor invasion or compression— can significantly impair the segmentation accuracy of these AI models in clinical scenarios..
 
 ---
 
 ## Pre-trained Models
 
-All five trained models are released on Hugging Face:
+All trained models are released on Hugging Face:
 
 🔗 https://huggingface.co/Xunqi/nnunet_segment_model/tree/main
 
 | Task | Configuration | Modality |
 |------|---------------|----------|
-| Couinaud_segment | `3d_fullres` | MRI |
-| Liver_segment| `3d_fullres` |  MRI |
-| Livertumor_segment | `3d_fullres` | MRI |
-| Spleen_segment | `3d_fullres` | MRI |
-| Muscle_segment| `3d_fullres` | MRI |
+| Portal_veins_segment | `3d_fullres` | CT |
+| Hepatic_veins_segment | `3d_fullres` | CT |
+| Liver_tumor_segment | `3d_fullres` | CT |
 
 To use a pre-trained model:
 
@@ -58,8 +55,8 @@ nnUNetv2_install_pretrained_model_from_zip path/to/downloaded_model.zip
 ## Installation
 
 ```bash
-conda create -n lxq_nnunet python=3.10 -y
-conda activate lxq_nnunet
+conda create -n nnunet python=3.10 -y
+conda activate nnunet
 pip install torch --index-url https://download.pytorch.org/whl/cu121
 pip install -e .
 ```
@@ -100,15 +97,16 @@ nnUNetv2_train <DatasetID> 3d_fullres <fold>
 
 ---
 
-## PHLF Database (Companion Dataset)
+## HVM Dataset (Companion Dataset)
 
-The annotated dataset used to train these models — and used for PHLF prediction in our study — includes:
+The annotated dataset used to train these models includes:
 
 | Item | Description |
 |------|-------------|
-| Imaging modality | hepatobiliary phase (HBP) |
-| Annotated structures | liver, liver tumor, 8 Couinaud segments, spleen, skeletal muscle |
-| Annotation protocol | nnU-Net pre-segmentation → manual correction by two radiologists |
+| Imaging modality | Portal Venous Phase (PVP) contrast-enhanced CT |
+| Number of cases | 282 patients from two medical centers |
+| Number of slices | Over 41,400 slices |
+| Annotated structures | Hepatic veins, portal veins (to third-order branches), liver tumors |
 
 ---
 
@@ -116,18 +114,67 @@ The annotated dataset used to train these models — and used for PHLF predictio
 
 Ground-truth labels in our dataset were produced through a rigorous semi-automatic pipeline:
 
-1. Five initial nnU-Net models—specifically, those for liver parenchyma segmentation, liver segment delineation, hepatic tumor segmentation, spleen segmentation, and psoas major muscle segmentation—were trained on a small, manually annotated dataset subset.
-2. The models produced first-pass predictions on the remaining cases
-3. These preliminary outputs underwent a comprehensive two-tiered manual review process. First, a radiologist with 5 years of experience refined the AI-generated segmentations. Subsequently, a senior abdominal radiologist with 15 years of expertise conducted a final quality check and performed additional refinements as required. The resulting consensus annotations, representing clinically adjudicated ground truth labels, are provided.
+Step 1: Initial Segmentation:
+A radiologist with 5 years of experience in abdominal imaging performed the initial manual segmentation for all cases using ITK-SNAP software (version 3.8.0).
 
-This semi-automatic pipeline enabled efficient annotation across all five structures. The released models in this repository are trained on the final, radiologist-corrected labels, ensuring high-quality ground truth for accurate segmentation.
+Step 2: AI-Assisted Annotation:
+For hepatic veins and portal veins:
+- Initial ground truth from 40 cases was used to train two dedicated 3D-UNet models
+- The trained models generated preliminary segmentation masks for remaining 242 cases
+- The junior radiologist manually corrected these AI-generated masks
+
+Step 3: Quality Control and Final Validation:
+A senior abdominal radiologist with more than 15 years of expertise reviewed all segmentations, corrected any inaccuracies, and provided final validation.
+
+Annotation Scope:
+- Hepatic veins: right, middle, and left hepatic veins, including all visible tributaries up to third-order branches
+- Portal veins: main portal vein, left and right portal veins up to third branch of ramification
+- Liver tumors: complete boundary delineation
+
+---
+
+## Data Records
+
+The HVM Dataset is publicly accessible via Zenodo:
+
+🔗 https://zenodo.org/records/17863696
+
+Dataset structure:
+```
+HVM Dataset/
+├── Center 1/
+│   ├── Image/                           # PVP CT scans (NIfTI format)
+│   ├── Annotation_Hepatic veins/        # Hepatic vein segmentations
+│   ├── Annotation_Portal veins/         # Portal vein segmentations
+│   ├── Annotation_Liver tumors/         # Liver tumor segmentations
+│   └── Center_1_Clinicopathological data.xlsx
+└── Center 2/
+    ├── Image/
+    ├── Annotation_Hepatic veins/
+    ├── Annotation_Portal veins/
+    ├── Annotation_Liver tumors/
+    └── Center_2_Clinicopathological data.xlsx
+```
+
+---
+
+## Technical Validation
+
+Image Quality Control:
+- Each CT scan underwent a two-stage quality assessment
+- Subject eligibility confirmed based on predefined inclusion criteria
+- Visual inspection by a radiologist with over 15 years of experience to confirm absence of significant artifacts and verify adequate vascular contrast
+
+Annotation Quality Control:
+- Multi-step protocol combining manual expertise and AI-assisted refinement
+- Consensus-based ground truth established through two-tier review process
 
 ---
 
 ## Project Structure
 
 ```
-lxq_nnunet/
+nnunet/
 ├── nnunetv2/
 │   ├── experiment_planning/    # Dataset fingerprinting and planning
 │   ├── inference/              # Inference and prediction modules
@@ -152,21 +199,17 @@ lxq_nnunet/
 ## License
 
 - The nnU-Net framework code retains its original Apache-2.0 license.
-- Our released model weights and dataset are distributed under Apache-2.0.
+- Our released model weights and dataset are distributed under CC-BY license.
 
 ---
 
 ## Citation
 
-
-
-
+If you use this dataset or models, please cite:
 ---
 
 ## Acknowledgments
 
 This project is based on the nnU-Net framework developed by the Division of Medical Image Computing at the German Cancer Research Center (DKFZ), Heidelberg, Germany. We thank Fabian Isensee and the DKFZ team for releasing nnU-Net.
 
-We extend our sincere gratitude to Dr. D.K and Dr. Z.L who provided high-quality ground truth annotations for all five segmentation targets. Their expertise and meticulous manual delineations — through nnU-Net pre-segmentation followed by careful manual correction — form the foundation of the accurate segmentation models in this project.
-
-We also acknowledge the PHLF Database, a dedicated clinical dataset that supports the development and validation of liver-related segmentation algorithms, enabling advances in preoperative planning and postoperative outcome prediction for hepatic surgery.
+We extend our sincere gratitude to the radiologists who provided high-quality ground truth annotations for hepatic veins, portal veins, and liver tumors. Their expertise and meticulous manual delineations form the foundation of the accurate segmentation models in this project.
